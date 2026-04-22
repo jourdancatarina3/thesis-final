@@ -1,0 +1,11 @@
+# Used by `gcloud run deploy --source .` (and Cloud Build) to decide what to upload.
+# When this file exists, gcloud does NOT auto-merge only .gitignore; we include it explicitly below.
+
+#!include:.gitignore
+
+# Model artifacts are gitignored but must be present in the upload for inference.
+# Negation rules must come after the included .gitignore patterns.
+!models/
+!models/*.pkl
+!models/*.json
+!models/*.npy
