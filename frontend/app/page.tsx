@@ -71,13 +71,6 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </Link>
-
-          <Link
-            href="/questionnaire#paste"
-            className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-blue-700 bg-white border border-dashed border-blue-300 rounded-xl shadow-sm hover:bg-blue-50 hover:border-blue-400 transition-all duration-200"
-          >
-            Paste answers & auto-submit (test)
-          </Link>
         </div>
 
         <p className="mt-8 text-sm text-gray-500 flex items-center justify-center gap-2">

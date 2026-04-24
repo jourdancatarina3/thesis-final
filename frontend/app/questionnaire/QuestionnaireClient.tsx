@@ -55,7 +55,6 @@ export default function QuestionnaireClient() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [optionMappings, setOptionMappings] = useState<number[][]>([]); // For each question: shuffledIndex -> originalIndex
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
-  const [pastedAnswers, setPastedAnswers] = useState("");
 
   // Shuffle options for each question and store mappings
   const shuffledQuestionnaire = useMemo(() => {
@@ -277,60 +276,6 @@ export default function QuestionnaireClient() {
     }
   }, [questionnaire, isAutoTest, hasAutoSubmitted, handleSubmit]);
 
-  const handlePastedAnswersSubmit = useCallback(() => {
-    if (!questionnaire) {
-      alert("Questionnaire not loaded yet.");
-      return;
-    }
-
-    const lines = pastedAnswers
-      .split("\n")
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0);
-
-    if (lines.length !== questionnaire.total_questions) {
-      alert(
-        `Please provide exactly ${questionnaire.total_questions} non-empty lines. You provided ${lines.length}.`
-      );
-      return;
-    }
-
-    try {
-      const presetAnswers: number[] = questionnaire.questions.map(
-        (q: QuestionnaireQuestion, idx: number) => {
-          const desired = lines[idx];
-          // Try exact match first
-          let optionIndex = q.options.indexOf(desired);
-
-          // If not found, try case-insensitive match
-          if (optionIndex === -1) {
-            const lowerDesired = desired.toLowerCase();
-            optionIndex = q.options.findIndex(
-              (opt: string) => opt.toLowerCase() === lowerDesired
-            );
-          }
-
-          if (optionIndex === -1) {
-            throw new Error(
-              `Could not find an option matching your answer for question ${q.id}:\n"${desired}"`
-            );
-          }
-
-          return optionIndex;
-        }
-      );
-
-      setAnswers(presetAnswers);
-      setCurrentQuestionIndex(questionnaire.total_questions - 1);
-      handleSubmit(presetAnswers);
-    } catch (e: unknown) {
-      console.error("Failed to submit pasted answers:", e);
-      const msg =
-        e instanceof Error ? e.message : "Failed to submit pasted answers. Please check them.";
-      alert(msg);
-    }
-  }, [questionnaire, pastedAnswers, handleSubmit]);
-
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setIsAnimating(true);
@@ -449,45 +394,6 @@ export default function QuestionnaireClient() {
                 )}
               </button>
             )}
-          </div>
-
-          {/* Testing: paste answers */}
-          <div
-            id="paste"
-            className="bg-white rounded-xl shadow-md p-6 border border-dashed border-blue-200"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-700">
-                Testing: paste 30 answers (one per line)
-              </h2>
-              <span className="text-[11px] uppercase tracking-wide text-blue-500 font-semibold">
-                For development use
-              </span>
-            </div>
-            <p className="text-xs text-gray-500 mb-3">
-              Paste your answers in order from question 1 to {questionnaire.total_questions}. Each line must
-              exactly match one of the options for that question.
-            </p>
-            <textarea
-              value={pastedAnswers}
-              onChange={(e) => setPastedAnswers(e.target.value)}
-              className="w-full h-40 text-sm border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-y"
-              placeholder="Line 1: answer to question 1&#10;Line 2: answer to question 2&#10;...&#10;Line 30: answer to question 30"
-            />
-            <div className="mt-3 flex justify-end">
-              <button
-                type="button"
-                onClick={handlePastedAnswersSubmit}
-                disabled={isSubmitting || !pastedAnswers.trim()}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  isSubmitting || !pastedAnswers.trim()
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
-                }`}
-              >
-                Fill and submit from pasted answers
-              </button>
-            </div>
           </div>
 
           {/* Helpful hint */}
