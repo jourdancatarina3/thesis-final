@@ -287,7 +287,7 @@ def questionnaire_to_features(responses: Sequence[int]) -> np.ndarray:
     sr_no = 36.5  # median placeholder (model was trained with these)
     course = 0.0   # metadata placeholder
 
-    # Order must match merged combined_career_dataset schema (general_numeric)
+    # Order must match merged unified training schema (general_numeric)
     features = [
         academic_quantitative, academic_technical, academic_verbal,
         math_score, science_score,
@@ -308,7 +308,7 @@ def get_feature_names() -> List[str]:
         manifest = read_json(manifest_path)
         if "feature_names" in manifest:
             return manifest["feature_names"]
-    # Fallback: general feature schema from merge script (matches combined_career_dataset)
+    # Fallback: general feature schema from merge script (matches DATASET_TRAINING_UNIFIED_*)
     return [
         "Academic_Quantitative", "Academic_Technical", "Academic_Verbal",
         "Math_Score", "Science_Score",

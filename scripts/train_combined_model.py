@@ -2,7 +2,7 @@
 """
 Train the career predictor on the combined non-survey dataset.
 
-Uses data/combined_career_dataset.csv (from merge_career_datasets.py).
+Uses ``config.COMBINED_DATA_PATH`` / ``config.AUGMENTED_DATA_PATH`` (from merge and optional augment).
 No questionnaire data, no DeBERTa embeddings - tabular features only.
 
 Run merge_career_datasets.py first.
@@ -126,12 +126,12 @@ def _tune_lgb(X, y, sample_weights, n_trials=15):
     return study.best_params | {"best_score": study.best_value}
 
 
-# Prefer augmented dataset (includes gold-profile synthetic samples) for better questionnaire alignment
-AUGMENTED_DATA_PATH = config.DATA_DIR / "combined_career_dataset_augmented.csv"
-
-
 def main():
-    data_path = AUGMENTED_DATA_PATH if AUGMENTED_DATA_PATH.exists() else config.COMBINED_DATA_PATH
+    data_path = (
+        config.AUGMENTED_DATA_PATH
+        if config.AUGMENTED_DATA_PATH.exists()
+        else config.COMBINED_DATA_PATH
+    )
     if not data_path.exists():
         print("Error: No training data found.")
         print("Run: python scripts/merge_career_datasets.py")

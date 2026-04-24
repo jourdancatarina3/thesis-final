@@ -9,7 +9,7 @@ Produces:
 4. f1_score.png - Per-class F1 score bar chart
 5. tsne_embeddings.png - t-SNE visualization of feature space by career category
 
-Requires: trained model (career_predictor.pkl), label_encoder.pkl, combined_career_dataset.
+Requires: trained model (career_predictor.pkl), label_encoder.pkl, unified training CSV (augmented if present).
 Run train_combined_model.py first if needed.
 """
 
@@ -80,11 +80,13 @@ def plot_reliability_curve(y_true, proba, output_path):
 
 def _load_data_and_model():
     """Load combined data and trained model. Mirrors train_combined_model pipeline."""
-    data_path = config.DATA_DIR / "combined_career_dataset_augmented.csv"
+    data_path = (
+        config.AUGMENTED_DATA_PATH
+        if config.AUGMENTED_DATA_PATH.exists()
+        else config.COMBINED_DATA_PATH
+    )
     if not data_path.exists():
-        data_path = config.COMBINED_DATA_PATH
-    if not data_path.exists():
-        raise FileNotFoundError("No combined career dataset found.")
+        raise FileNotFoundError("No unified training dataset found (run merge, then optionally augment).")
 
     df = pd.read_csv(data_path)
     df = df[df["career"].isin(config.TARGET_CAREERS)].copy()

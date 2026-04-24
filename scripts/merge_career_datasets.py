@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Merge career_dataset.csv, new_career_dataset.xlsx, new_career_dataset2.csv,
-and career_path_in_all_field.csv into training datasets with consistent
-14-category labels.
+Merge source CSV/XLSX files (see ml_pipeline.config SOURCE_* paths) into training
+datasets with consistent 14-category labels.
 
 Outputs:
-1. data/combined_career_dataset.csv - Processed: imputation, balanced sampling, sorted by category
-2. data/raw_combined_career_dataset.csv - Raw: no imputation, no balancing, sorted by category
+1. dataset_training_unified_balanced_imputed.csv — processed: imputation, balanced sampling, sorted by category
+2. dataset_training_raw_union_by_source.csv — raw: no imputation, no balancing, sorted by category
 """
 
 from __future__ import annotations
@@ -185,8 +184,8 @@ def map_field_and_career_to_category(field: str, career: str, mapping: dict) -> 
 
 
 def load_career_dataset() -> pd.DataFrame:
-    """Load and prepare career_dataset.csv."""
-    df = pd.read_csv(config.DATA_DIR / "career_dataset.csv")
+    """Load academic percentages / IT suggested roles source table."""
+    df = pd.read_csv(config.SOURCE_ACADEMIC_IT_ROLES_CSV)
     # Drop unnamed index column if present
     if df.columns[0] == "Unnamed: 0" or df.columns[0].startswith("Unnamed"):
         df = df.drop(columns=[df.columns[0]], errors="ignore")
@@ -196,18 +195,18 @@ def load_career_dataset() -> pd.DataFrame:
 
 
 def load_new_career_dataset2() -> pd.DataFrame:
-    """Load and prepare new_career_dataset2.csv."""
-    df = pd.read_csv(config.DATA_DIR / "new_career_dataset2.csv")
+    """Load STEM / RIASEC scores with career label column."""
+    df = pd.read_csv(config.SOURCE_STEM_RIASEC_CSV)
     df["_source"] = "new_career_dataset2"
     df["_raw_label"] = df["Career"]
     return df
 
 
 def load_career_path_in_all_field() -> pd.DataFrame:
-    """Load career_path_in_all_field.csv."""
-    path = config.DATA_DIR / "career_path_in_all_field.csv"
+    """Load multidisciplinary career trajectory / field paths source table."""
+    path = config.SOURCE_CAREER_TRAJECTORIES_CSV
     if not path.exists():
-        raise FileNotFoundError(f"career_path_in_all_field.csv not found at {path}")
+        raise FileNotFoundError(f"Career trajectories source CSV not found at {path}")
     df = pd.read_csv(path)
     df["_source"] = "career_path_in_all_field"
     return df
@@ -309,15 +308,16 @@ def prepare_career_path_in_all_field(
 
 
 def load_new_career_dataset_xlsx() -> pd.DataFrame | None:
-    """Load new_career_dataset.xlsx if openpyxl is available."""
+    """Load multiple-intelligence / job profession XLSX if openpyxl is available."""
+    xlsx = config.SOURCE_MULTIPLE_INTELLIGENCE_XLSX
     try:
-        df = pd.read_excel(config.DATA_DIR / "new_career_dataset.xlsx")
+        df = pd.read_excel(xlsx)
     except ImportError:
-        print("Warning: openpyxl not installed. Skipping new_career_dataset.xlsx")
+        print(f"Warning: openpyxl not installed. Skipping {xlsx.name}")
         print("  Install with: pip install openpyxl")
         return None
     except FileNotFoundError:
-        print("Warning: new_career_dataset.xlsx not found. Skipping.")
+        print(f"Warning: {xlsx.name} not found. Skipping.")
         return None
 
     # Determine label column
@@ -654,36 +654,36 @@ def main() -> None:
 
     dfs = []
 
-    # Load career_dataset.csv
+    # Load academic / IT roles source
     df1 = load_career_dataset()
     df1_prep = prepare_career_dataset(df1, mapping, schema)
     dfs.append(df1_prep)
-    print(f"Loaded career_dataset.csv: {len(df1_prep)} rows")
+    print(f"Loaded {config.SOURCE_ACADEMIC_IT_ROLES_CSV.name}: {len(df1_prep)} rows")
 
-    # Load new_career_dataset2.csv
+    # Load STEM + RIASEC source
     df2 = load_new_career_dataset2()
     df2_prep = prepare_new_career_dataset2(df2, mapping, schema)
     dfs.append(df2_prep)
-    print(f"Loaded new_career_dataset2.csv: {len(df2_prep)} rows")
+    print(f"Loaded {config.SOURCE_STEM_RIASEC_CSV.name}: {len(df2_prep)} rows")
 
-    # Load new_career_dataset.xlsx (optional)
+    # Load multiple-intelligence XLSX (optional)
     df3 = load_new_career_dataset_xlsx()
     if df3 is not None:
         df3_prep = prepare_new_career_dataset(df3, mapping, schema)
         dfs.append(df3_prep)
-        print(f"Loaded new_career_dataset.xlsx: {len(df3_prep)} rows")
+        print(f"Loaded {config.SOURCE_MULTIPLE_INTELLIGENCE_XLSX.name}: {len(df3_prep)} rows")
 
-    # Load career_path_in_all_field.csv
+    # Load career trajectories by field
     df4 = load_career_path_in_all_field()
     df4_prep = prepare_career_path_in_all_field(df4, schema, mapping)
     dfs.append(df4_prep)
-    print(f"Loaded career_path_in_all_field.csv: {len(df4_prep)} rows")
+    print(f"Loaded {config.SOURCE_CAREER_TRAJECTORIES_CSV.name}: {len(df4_prep)} rows")
 
     # --- Processed combined dataset (imputation, balancing, sorted by category) ---
     combined = merge_and_fill(dfs, schema)
     output_cols = [c for c in combined.columns if c != "_source"]
     combined = combined[output_cols].sort_values(["career", "course_name"]).reset_index(drop=True)
-    out_path = config.DATA_DIR / "combined_career_dataset.csv"
+    out_path = config.DATASET_TRAINING_UNIFIED_BALANCED_CSV
     combined.to_csv(out_path, index=False)
     print(f"\nSaved combined dataset to {out_path}")
     print(f"Total rows: {len(combined)}")
@@ -699,7 +699,7 @@ def main() -> None:
     raw_combined = merge_raw(dfs_raw)
     raw_output_cols = [c for c in raw_combined.columns if c != "_source"]
     raw_combined = raw_combined[raw_output_cols]
-    raw_path = config.DATA_DIR / "raw_combined_career_dataset.csv"
+    raw_path = config.DATASET_TRAINING_RAW_UNION_CSV
     raw_combined.to_csv(raw_path, index=False)
     print(f"\nSaved raw combined dataset to {raw_path}")
     print(f"Total rows: {len(raw_combined)}")

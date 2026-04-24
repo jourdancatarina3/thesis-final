@@ -21,7 +21,7 @@ Reported accuracy and calibration numbers in the thesis write-up are **internal 
 ```
 thesis-v0.3/
 ├── scripts/
-│   ├── merge_career_datasets.py     # Merge sources → combined_career_dataset.csv
+│   ├── merge_career_datasets.py     # Merge sources → dataset_training_unified_balanced_imputed.csv
 │   ├── augment_training_data.py     # Optional synthetic rows (gold profiles)
 │   ├── train_combined_model.py      # Train calibrated booster on tabular features
 │   ├── run_full_pipeline.sh         # augment → train → validate_gold_profiles
@@ -31,8 +31,9 @@ thesis-v0.3/
 ├── data/
 │   ├── questionnaire.json
 │   ├── job_to_category_mapping.json
-│   ├── combined_career_dataset.csv           # generated
-│   ├── combined_career_dataset_augmented.csv # optional
+│   ├── source_*.csv / .xlsx                    # merge inputs (see DATA_MERGE_README)
+│   ├── dataset_training_unified_balanced_imputed.csv   # generated (merge)
+│   ├── dataset_training_unified_balanced_augmented.csv  # optional (augment)
 │   ├── gold_profiles.json                    # optional (augmentation)
 │   └── DATA_MERGE_README.md
 ├── ml_pipeline/                   # Shared Python modules
@@ -52,7 +53,7 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-`openpyxl` is listed so `merge_career_datasets.py` can read `new_career_dataset.xlsx` when present.
+`openpyxl` is listed so `merge_career_datasets.py` can read `source_multiple_intelligence_job_professions.xlsx` when present.
 
 ### Train the combined model
 
@@ -64,8 +65,8 @@ python scripts/train_combined_model.py
 
 Or run `./scripts/run_full_pipeline.sh` (uses `.venv/bin/python` if available, otherwise `python3`).
 
-- Merge writes `data/combined_career_dataset.csv` (and updates mapping behavior as configured in the script).
-- Training prefers `combined_career_dataset_augmented.csv` when it exists; otherwise `combined_career_dataset.csv`. Outputs include `models/career_predictor.pkl`, `models/label_encoder.pkl`, `models/feature_manifest.json` (`model_type: combined_tabular`), and `models/model_metadata.json`.
+- Merge writes `data/dataset_training_unified_balanced_imputed.csv` (and `dataset_training_raw_union_by_source.csv`; see `ml_pipeline/config.py` for canonical paths).
+- Training prefers `dataset_training_unified_balanced_augmented.csv` when it exists; otherwise the imputed unified file. Outputs include `models/career_predictor.pkl`, `models/label_encoder.pkl`, `models/feature_manifest.json` (`model_type: combined_tabular`), and `models/model_metadata.json`.
 
 Dataset provenance and column rules: [data/DATA_MERGE_README.md](data/DATA_MERGE_README.md).
 

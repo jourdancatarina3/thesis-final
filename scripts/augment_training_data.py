@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Augment combined_career_dataset.csv with synthetic samples from gold questionnaire profiles.
+Augment the unified balanced training CSV with synthetic samples from gold questionnaire profiles.
+
+Reads ``config.COMBINED_DATA_PATH`` (imputed, balanced merge output). Writes
+``config.AUGMENTED_DATA_PATH``.
 
 This ensures the model sees feature vectors that match questionnaire responses,
 fixing the gap where training data came from different sources (job listings, surveys)
@@ -8,7 +11,6 @@ and inference comes from questionnaire_to_features().
 
 - Adds synthetic samples per career from gold profiles + small noise
 - Oversamples underrepresented careers (Nursing, Medicine, Psychology, etc.) to rebalance
-- Output: data/combined_career_dataset_augmented.csv
 """
 
 from __future__ import annotations
@@ -83,7 +85,7 @@ def generate_synthetic_from_profile(
 
 def main():
     if not config.COMBINED_DATA_PATH.exists():
-        print("Error: combined_career_dataset.csv not found. Run merge_career_datasets.py first.")
+        print(f"Error: {config.COMBINED_DATA_PATH.name} not found. Run merge_career_datasets.py first.")
         sys.exit(1)
 
     df = pd.read_csv(config.COMBINED_DATA_PATH)
@@ -145,7 +147,7 @@ def main():
                 lo, hi = 0, 20
             combined[col] = combined[col].clip(lower=lo, upper=hi)
 
-    out_path = config.DATA_DIR / "combined_career_dataset_augmented.csv"
+    out_path = config.AUGMENTED_DATA_PATH
     combined.to_csv(out_path, index=False)
     print(f"\nSaved augmented dataset to {out_path}")
     print(f"Total rows: {len(combined)} (was {len(df)})")

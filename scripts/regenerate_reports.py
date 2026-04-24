@@ -26,7 +26,7 @@ from ml_pipeline.evaluation import plot_confusion_matrix, plot_reliability_curve
 
 def main() -> None:
     if not config.COMBINED_DATA_PATH.exists():
-        print("Error: combined_career_dataset.csv not found.")
+        print(f"Error: {config.COMBINED_DATA_PATH.name} not found.")
         sys.exit(1)
 
     model_path = config.MODELS_DIR / "career_predictor.pkl"
