@@ -43,10 +43,29 @@ function shuffleArray<T>(array: T[]): { shuffled: T[]; mapping: number[] } {
   return { shuffled, mapping };
 }
 
-export default function QuestionnaireClient() {
+export type StudyPredictPayload = {
+  responses: { questionId: number; answerIndex: number }[];
+  predictions: { career: string; probability: number }[];
+};
+
+type QuestionnaireClientProps = {
+  /** When set, questionnaire progress is stored under a study-specific localStorage key. */
+  studyProgressKeySuffix?: string;
+  /** When set, successful predict calls this instead of navigating with URL params (study flow). */
+  onStudyPredictSuccess?: (payload: StudyPredictPayload) => void;
+};
+
+export default function QuestionnaireClient({
+  studyProgressKeySuffix,
+  onStudyPredictSuccess,
+}: QuestionnaireClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAutoTest = searchParams.get("autoTest") === "1";
+
+  const progressStorageKey = studyProgressKeySuffix
+    ? `study_questionnaire_progress_${studyProgressKeySuffix}`
+    : "questionnaire_progress";
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questionnaire, setQuestionnaire] = useState<QuestionnaireData | null>(null);
@@ -90,7 +109,7 @@ export default function QuestionnaireClient() {
   // Load saved progress from localStorage (skip if auto test mode)
   useEffect(() => {
     if (!questionnaire || optionMappings.length === 0 || isAutoTest) return;
-    const saved = localStorage.getItem("questionnaire_progress");
+    const saved = localStorage.getItem(progressStorageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -108,17 +127,17 @@ export default function QuestionnaireClient() {
         console.error("Failed to load saved progress", e);
       }
     }
-  }, [questionnaire, optionMappings, isAutoTest]);
+  }, [questionnaire, optionMappings, isAutoTest, progressStorageKey]);
 
   // Save progress to localStorage
   useEffect(() => {
     if (questionnaire && answers.length > 0) {
       localStorage.setItem(
-        "questionnaire_progress",
+        progressStorageKey,
         JSON.stringify({ answers, currentQuestionIndex })
       );
     }
-  }, [answers, currentQuestionIndex, questionnaire]);
+  }, [answers, currentQuestionIndex, questionnaire, progressStorageKey]);
 
   const handleSubmit = useCallback(
     async (answersToSubmit?: number[]) => {
@@ -154,11 +173,18 @@ export default function QuestionnaireClient() {
         }
 
         const data = await response.json();
-        
-        // Clear saved progress
-        localStorage.removeItem("questionnaire_progress");
-        
-        // Navigate to results page with predictions
+
+        localStorage.removeItem(progressStorageKey);
+
+        if (onStudyPredictSuccess) {
+          onStudyPredictSuccess({
+            responses,
+            predictions: data.predictions as StudyPredictPayload["predictions"],
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
         router.push(
           `/results?predictions=${encodeURIComponent(
             JSON.stringify(data.predictions)
@@ -170,7 +196,7 @@ export default function QuestionnaireClient() {
         setIsSubmitting(false);
       }
     },
-    [questionnaire, router, answers]
+    [questionnaire, router, answers, progressStorageKey, onStudyPredictSuccess]
   );
 
   // Auto-advance after selecting an answer
@@ -292,10 +318,10 @@ export default function QuestionnaireClient() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            <div className="absolute left-0 top-0 h-full w-full rounded-full border-4 border-[#bfdbfe]"></div>
+            <div className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-4 border-[#2563eb] border-t-transparent"></div>
           </div>
-          <p className="text-gray-600 text-lg">Loading questionnaire...</p>
+          <p className="text-lg text-[#525252]">Loading questionnaire...</p>
         </div>
       </div>
     );

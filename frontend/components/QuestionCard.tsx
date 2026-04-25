@@ -18,12 +18,12 @@ export default function QuestionCard({
   isAnimating = false,
 }: QuestionCardProps) {
   return (
-    <div 
-      className={`bg-white rounded-2xl shadow-lg p-6 md:p-8 border-2 border-gray-100 transition-all duration-300 ${
-        isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+    <div
+      className={`rounded-2xl border-2 border-[#e5e5e5] bg-white p-6 shadow-lg transition-all duration-300 md:p-8 ${
+        isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
       }`}
     >
-      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6 leading-relaxed">
+      <h2 className="mb-6 text-xl font-bold leading-relaxed text-[#171717] md:text-2xl">
         {question.question}
       </h2>
       <div className="space-y-3">
@@ -33,18 +33,18 @@ export default function QuestionCard({
             <button
               key={index}
               onClick={() => onAnswerSelect(index)}
-              className={`w-full text-left p-4 md:p-5 rounded-xl border-2 transition-all duration-200 transform hover:scale-[1.02] ${
+              className={`w-full transform rounded-xl border-2 p-4 text-left transition-all duration-200 hover:scale-[1.02] md:p-5 ${
                 isSelected
-                  ? "border-blue-600 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md ring-2 ring-blue-200"
-                  : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-sm"
+                  ? "border-[#2563eb] bg-gradient-to-r from-[#eff6ff] to-[#eef2ff] shadow-md ring-2 ring-[#bfdbfe]"
+                  : "border-[#d4d4d8] bg-white hover:border-[#93c5fd] hover:bg-[#f8fafc] hover:shadow-sm"
               }`}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`flex-shrink-0 w-6 h-6 rounded-full border-2 mt-0.5 flex items-center justify-center transition-all ${
+                  className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                     isSelected
-                      ? "border-blue-600 bg-blue-600"
-                      : "border-gray-300 bg-white"
+                      ? "border-[#2563eb] bg-[#2563eb]"
+                      : "border-[#d4d4d8] bg-white"
                   }`}
                 >
                   {isSelected && (
@@ -54,8 +54,8 @@ export default function QuestionCard({
                   )}
                 </div>
                 <span
-                  className={`text-base md:text-lg flex-1 ${
-                    isSelected ? "text-blue-900 font-semibold" : "text-gray-700"
+                  className={`flex-1 text-base md:text-lg ${
+                    isSelected ? "font-semibold text-[#1e3a8a]" : "text-[#404040]"
                   }`}
                 >
                   {option}

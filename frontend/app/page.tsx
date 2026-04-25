@@ -6,51 +6,53 @@ export default function Home() {
       <main className="w-full max-w-4xl mx-auto text-center">
         <div className="mb-8">
           <h1 className="text-6xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Career Discovery
+            Career field validation study
           </h1>
           <p className="text-2xl text-gray-700 mb-2 font-medium">
-            Discover Your Ideal Career Path
+            Help validate a college-field recommendation model
           </p>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Answer 30 questions about your preferences, values, and work style.
-            Our system maps your responses to the same features used by the career dataset model
-            and recommends the top 3 college fields or courses that best match your profile.
+            This survey is for employees in one of fourteen career fields. You will review a short
+            consent form, answer a few background questions, complete 30 preference items, see three
+            model-generated college-field recommendations, and answer a brief follow-up about how
+            those recommendations relate to your current role. Your responses are saved for thesis
+            research only as described in the consent text.
           </p>
         </div>
-        
+
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 mb-8 border border-gray-100">
           <h2 className="text-3xl font-semibold text-gray-800 mb-8">
-            How It Works
+            How it works
           </h2>
           <div className="grid md:grid-cols-3 gap-8 text-left">
             <div className="flex flex-col items-start">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg">
                 1
               </div>
-              <h3 className="font-bold text-xl text-gray-800 mb-3">Answer Questions</h3>
+              <h3 className="font-bold text-xl text-gray-800 mb-3">Consent and background</h3>
               <p className="text-gray-600 leading-relaxed">
-                Complete the 30-question survey covering behavior, academics, values, and work preferences.
-                Your progress is saved as you go.
+                Read the informed consent, confirm participation, then share your name, time in your
+                current role, job satisfaction, and the career field that best matches your job.
               </p>
             </div>
             <div className="flex flex-col items-start">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg">
                 2
               </div>
-              <h3 className="font-bold text-xl text-gray-800 mb-3">AI Analysis</h3>
+              <h3 className="font-bold text-xl text-gray-800 mb-3">Questionnaire and model</h3>
               <p className="text-gray-600 leading-relaxed">
-                A gradient-boosted model trained on combined career datasets scores your mapped
-                features and ranks the most likely career categories.
+                Complete 30 questions about preferences and work style. Your answers are mapped to
+                features and scored by a gradient-boosted model trained on combined career datasets.
               </p>
             </div>
             <div className="flex flex-col items-start">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg">
                 3
               </div>
-              <h3 className="font-bold text-xl text-gray-800 mb-3">Get Recommendations</h3>
+              <h3 className="font-bold text-xl text-gray-800 mb-3">Recommendations and validation</h3>
               <p className="text-gray-600 leading-relaxed">
-                Receive your top 3 career recommendations with detailed insights 
-                about why each career matches your profile.
+                View your top three college-field recommendations, then answer a short validation
+                section so we can measure alignment with your self-reported field and interests.
               </p>
             </div>
           </div>
@@ -58,14 +60,14 @@ export default function Home() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link
-            href="/questionnaire"
+            href="/study"
             className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
           >
-            <span>Start Your Career Discovery Journey</span>
-            <svg 
-              className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" 
-              fill="none" 
-              stroke="currentColor" 
+            <span>Begin validation survey</span>
+            <svg
+              className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -77,7 +79,7 @@ export default function Home() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Takes approximately 10-15 minutes to complete
+          Allow about 12–18 minutes; your questionnaire progress is saved in this browser
         </p>
       </main>
     </div>

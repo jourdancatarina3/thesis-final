@@ -12,11 +12,13 @@ const ACCENT_BORDERS = {
 
 export default function ResultsCard({ career, description, accentColor = "slate" }: ResultsCardProps) {
   return (
-    <div className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 border border-gray-200 border-l-4 ${ACCENT_BORDERS[accentColor]}`}>
+    <div
+      className={`overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-md transition-all duration-200 hover:shadow-lg border-l-4 ${ACCENT_BORDERS[accentColor]}`}
+    >
       <div className="p-6 md:p-8">
-        <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3">{career}</h3>
+        <h3 className="mb-3 text-xl font-semibold text-[#171717] md:text-2xl">{career}</h3>
         {description && (
-          <p className="text-gray-600 text-[15px] leading-relaxed">{description}</p>
+          <p className="text-[15px] leading-relaxed text-[#525252]">{description}</p>
         )}
       </div>
     </div>

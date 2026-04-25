@@ -6,7 +6,7 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-[#fafaf9]">
           <LoadingSpinner />
         </div>
       }

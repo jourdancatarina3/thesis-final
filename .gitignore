@@ -25,6 +25,8 @@ data/processed_*.csv
 data/career_info.json
 # Large raw data (keep local only; use Git LFS or external storage if needed)
 data/job_descriptions.csv
+# Research exports (PII — do not commit)
+data/employee_validation_sessions.csv
 
 # Node
 node_modules/
