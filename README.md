@@ -80,6 +80,24 @@ npm run dev
 
 Open `http://localhost:3000`. The App Router handler `frontend/app/api/predict/route.ts` runs `api/predict.py` from the repo root; Python must resolve the `ml_pipeline` package (virtualenv or `PYTHONPATH` as you prefer).
 
+### Validation study storage (Supabase)
+
+Completed study responses (`POST /api/study-response`) are stored in **Supabase Postgres**, not on the server filesystem (required for **Vercel** and other serverless hosts).
+
+1. **Create a Supabase project** at [supabase.com](https://supabase.com).
+2. **Run the migration:** In the Supabase **SQL Editor**, paste and execute [`supabase/migrations/001_employee_validation_sessions.sql`](supabase/migrations/001_employee_validation_sessions.sql). This creates table `public.employee_validation_sessions` with RLS enabled (inserts use the **service role** from your API route only).
+3. **Environment variables** (never commit real values; copy from Supabase **Settings → API**):
+   - `SUPABASE_URL` — Project URL
+   - `SUPABASE_SERVICE_ROLE_KEY` — `service_role` secret (server-only; do **not** use `NEXT_PUBLIC_` prefix)
+
+   For local dev, add them to `frontend/.env.local`. See [`frontend/.env.example`](frontend/.env.example).
+
+4. **Vercel:** Project → **Settings → Environment Variables** → add both variables for **Production** (and **Preview** if needed), then redeploy.
+
+5. **Exporting data for analysis:** Supabase **Table Editor** → `employee_validation_sessions` → **Export** (CSV). Alternatively use SQL or a notebook against the same table.
+
+If these variables are missing, `/api/study-response` returns **503** with a configuration message.
+
 ### Inference requirements
 
 `api/predict.py` expects a trained combined model: `models/feature_manifest.json` with `"model_type": "combined_tabular"`. There is no legacy fallback if artifacts are missing.

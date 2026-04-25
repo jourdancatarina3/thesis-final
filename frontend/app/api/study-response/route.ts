@@ -1,58 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
 import { isTenureBandId, tenureBandToParts } from "@/lib/studySession";
+import { createSupabaseAdmin } from "@/lib/supabaseAdmin";
 
-/**
- * Persists validation-study rows to repo data/ (same cwd convention as /api/predict).
- * Not suitable for read-only or ephemeral serverless disks — use a DB or blob store in production.
- */
-const CSV_FILENAME = "employee_validation_sessions.csv";
-
-function escapeCsvField(value: string | number | boolean | null | undefined): string {
-  if (value === null || value === undefined) return "";
-  const s = typeof value === "string" ? value : String(value);
-  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-
-function rowFromPayload(p: Record<string, string | number | boolean>): string {
-  const header = [
-    "submitted_at_utc",
-    "session_id",
-    "consent_version",
-    "consent_timestamp",
-    "participant_name",
-    "tenure_total_months",
-    "tenure_years_part",
-    "tenure_months_part",
-    "job_satisfaction",
-    "self_reported_career_field",
-    "job_title",
-    "total_work_experience_years",
-    "education_level",
-    "responses_json",
-    "pred_career_1",
-    "pred_prob_1",
-    "pred_career_2",
-    "pred_prob_2",
-    "pred_career_3",
-    "pred_prob_3",
-    "computed_self_reported_in_top3",
-    "participant_field_in_top3_answer",
-    "rating_top1",
-    "rating_top2",
-    "rating_top3",
-  ];
-
-  const values = header.map((key) => {
-    const v = p[key];
-    return escapeCsvField(v);
-  });
-  return values.join(",") + "\n";
+function isUniqueViolation(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === "23505") return true;
+  return typeof error.message === "string" && error.message.toLowerCase().includes("duplicate");
 }
 
 export async function POST(request: NextRequest) {
+  const supabase = createSupabaseAdmin();
+  if (!supabase) {
+    return NextResponse.json(
+      {
+        error:
+          "Study data storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server.",
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     const body = await request.json();
 
@@ -119,66 +86,67 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const submittedAt = typeof body.feedbackSubmittedAt === "string" ? body.feedbackSubmittedAt : new Date().toISOString();
+    const submittedAtRaw =
+      typeof body.feedbackSubmittedAt === "string" ? body.feedbackSubmittedAt : new Date().toISOString();
     const consentVersion = typeof body.consentVersion === "string" ? body.consentVersion : "";
     const consentTimestamp = typeof body.consentTimestamp === "string" ? body.consentTimestamp : "";
 
     const top = predictions.slice(0, 3) as { career?: string; probability?: number }[];
-    const responsesJson = JSON.stringify(responses);
 
-    const row: Record<string, string | number | boolean> = {
-      submitted_at_utc: submittedAt,
+    const jobTitle =
+      typeof screening.jobTitle === "string" && screening.jobTitle.trim()
+        ? screening.jobTitle.trim()
+        : "";
+    const totalWorkExperienceYears =
+      screening.totalWorkExperienceYears != null && String(screening.totalWorkExperienceYears).trim() !== ""
+        ? String(screening.totalWorkExperienceYears).trim()
+        : "";
+    const educationLevel =
+      typeof screening.educationLevel === "string" && screening.educationLevel.trim()
+        ? screening.educationLevel.trim()
+        : "";
+
+    const insertRow = {
+      submitted_at_utc: submittedAtRaw,
       session_id: sessionId,
       consent_version: consentVersion,
       consent_timestamp: consentTimestamp,
       participant_name: name,
+      tenure_band: bandRaw,
       tenure_total_months: totalMonths,
       tenure_years_part: tenureYears,
       tenure_months_part: tenureMonths,
       job_satisfaction: sat,
       self_reported_career_field: field,
-      job_title:
-        typeof screening.jobTitle === "string" && screening.jobTitle.trim()
-          ? screening.jobTitle.trim()
-          : "",
-      total_work_experience_years:
-        screening.totalWorkExperienceYears != null && String(screening.totalWorkExperienceYears).trim() !== ""
-          ? String(screening.totalWorkExperienceYears).trim()
-          : "",
-      education_level:
-        typeof screening.educationLevel === "string" && screening.educationLevel.trim()
-          ? screening.educationLevel.trim()
-          : "",
-      responses_json: responsesJson,
+      job_title: jobTitle,
+      total_work_experience_years: totalWorkExperienceYears,
+      education_level: educationLevel,
+      responses_json: responses,
       pred_career_1: top[0]?.career ?? "",
-      pred_prob_1: top[0]?.probability ?? "",
+      pred_prob_1: typeof top[0]?.probability === "number" ? top[0].probability : null,
       pred_career_2: top[1]?.career ?? "",
-      pred_prob_2: top[1]?.probability ?? "",
+      pred_prob_2: typeof top[1]?.probability === "number" ? top[1].probability : null,
       pred_career_3: top[2]?.career ?? "",
-      pred_prob_3: top[2]?.probability ?? "",
+      pred_prob_3: typeof top[2]?.probability === "number" ? top[2].probability : null,
       computed_self_reported_in_top3: computed,
       participant_field_in_top3_answer: fieldInTop3,
-      rating_top1: needRatings ? Number(r1) : "",
-      rating_top2: needRatings ? Number(r2) : "",
-      rating_top3: needRatings ? Number(r3) : "",
+      rating_top1: needRatings ? Number(r1) : null,
+      rating_top2: needRatings ? Number(r2) : null,
+      rating_top3: needRatings ? Number(r3) : null,
     };
 
-    const projectRoot = join(process.cwd(), "..");
-    const dataDir = join(projectRoot, "data");
-    const csvPath = join(dataDir, CSV_FILENAME);
+    const { error } = await supabase.from("employee_validation_sessions").insert(insertRow);
 
-    if (!existsSync(dataDir)) {
-      mkdirSync(dataDir, { recursive: true });
+    if (error) {
+      if (isUniqueViolation(error)) {
+        return NextResponse.json(
+          { error: "This session was already submitted. Duplicate responses were not saved." },
+          { status: 409 }
+        );
+      }
+      console.error("study-response supabase:", error);
+      return NextResponse.json({ error: "Failed to save response." }, { status: 500 });
     }
-
-    const headerLine =
-      "submitted_at_utc,session_id,consent_version,consent_timestamp,participant_name,tenure_total_months,tenure_years_part,tenure_months_part,job_satisfaction,self_reported_career_field,job_title,total_work_experience_years,education_level,responses_json,pred_career_1,pred_prob_1,pred_career_2,pred_prob_2,pred_career_3,pred_prob_3,computed_self_reported_in_top3,participant_field_in_top3_answer,rating_top1,rating_top2,rating_top3\n";
-
-    if (!existsSync(csvPath)) {
-      appendFileSync(csvPath, headerLine, "utf8");
-    }
-
-    appendFileSync(csvPath, rowFromPayload(row), "utf8");
 
     return NextResponse.json({ ok: true });
   } catch (e) {
