@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendFileSync, existsSync, mkdirSync } from "fs";
-import { dirname, join } from "path";
+import { join } from "path";
 
 /**
  * Persists validation-study rows to repo data/ (same cwd convention as /api/predict).
@@ -80,10 +80,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid job satisfaction." }, { status: 400 });
     }
 
-    const field = typeof screening.selfReportedCareerField === "string" ? screening.selfReportedCareerField.trim() : "";
-    if (!field) {
-      return NextResponse.json({ error: "selfReportedCareerField is required." }, { status: 400 });
-    }
+    const field =
+      typeof screening.selfReportedCareerField === "string" ? screening.selfReportedCareerField.trim() : "";
 
     const responses = body.questionnaireResponses;
     if (!Array.isArray(responses) || responses.length !== 30) {
@@ -137,12 +135,18 @@ export async function POST(request: NextRequest) {
       tenure_months_part: Number(screening.tenureMonths) || 0,
       job_satisfaction: sat,
       self_reported_career_field: field,
-      job_title: typeof screening.jobTitle === "string" ? screening.jobTitle : "",
-      total_work_experience_years:
-        screening.totalWorkExperienceYears != null && screening.totalWorkExperienceYears !== ""
-          ? String(screening.totalWorkExperienceYears)
+      job_title:
+        typeof screening.jobTitle === "string" && screening.jobTitle.trim()
+          ? screening.jobTitle.trim()
           : "",
-      education_level: typeof screening.educationLevel === "string" ? screening.educationLevel : "",
+      total_work_experience_years:
+        screening.totalWorkExperienceYears != null && String(screening.totalWorkExperienceYears).trim() !== ""
+          ? String(screening.totalWorkExperienceYears).trim()
+          : "",
+      education_level:
+        typeof screening.educationLevel === "string" && screening.educationLevel.trim()
+          ? screening.educationLevel.trim()
+          : "",
       responses_json: responsesJson,
       pred_career_1: top[0]?.career ?? "",
       pred_prob_1: top[0]?.probability ?? "",

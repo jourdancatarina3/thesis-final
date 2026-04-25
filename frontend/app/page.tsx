@@ -32,7 +32,7 @@ export default function Home() {
               <h3 className="font-bold text-xl text-gray-800 mb-3">Consent and background</h3>
               <p className="text-gray-600 leading-relaxed">
                 Read the informed consent, confirm participation, then share your name, time in your
-                current role, job satisfaction, and the career field that best matches your job.
+                current role, and job satisfaction.
               </p>
             </div>
             <div className="flex flex-col items-start">
@@ -52,7 +52,7 @@ export default function Home() {
               <h3 className="font-bold text-xl text-gray-800 mb-3">Recommendations and validation</h3>
               <p className="text-gray-600 leading-relaxed">
                 View your top three college-field recommendations, then answer a short validation
-                section so we can measure alignment with your self-reported field and interests.
+                section so we can measure how the recommendations relate to your role and interests.
               </p>
             </div>
           </div>

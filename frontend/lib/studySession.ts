@@ -1,6 +1,3 @@
-import type { TargetCareer } from "./targetCareers";
-import { TARGET_CAREERS } from "./targetCareers";
-
 export const STUDY_SESSION_STORAGE_KEY = "study_validation_v1";
 export const CONSENT_VERSION = "2026-04-24";
 
@@ -22,10 +19,6 @@ export interface StudyScreening {
   tenureMonths: number;
   totalMonthsTenure: number;
   jobSatisfaction: 1 | 2 | 3 | 4 | 5;
-  selfReportedCareerField: TargetCareer;
-  jobTitle: string;
-  totalWorkExperienceYears: string;
-  educationLevel: string;
 }
 
 export interface StudySession {
@@ -88,20 +81,9 @@ export function ensureStudySession(): StudySession {
   return fresh;
 }
 
-/** Exact career label match against top-3 model outputs. */
-export function computeSelfReportedFieldInTop3(
-  selfReported: string,
-  predictions: PredictionItem[]
-): boolean {
-  const top = predictions.slice(0, 3).map((p) => p.career.trim());
-  return top.includes(selfReported.trim());
-}
-
 export function validateScreening(s: StudyScreening): string | null {
   if (!s.participantName.trim()) return "Please enter your name.";
   if (s.totalMonthsTenure <= 0) return "Please enter how long you have been in your current job (years and/or months).";
   if (s.jobSatisfaction < 1 || s.jobSatisfaction > 5) return "Please rate your job satisfaction.";
-  if (!TARGET_CAREERS.includes(s.selfReportedCareerField as TargetCareer))
-    return "Please select your current career field.";
   return null;
 }

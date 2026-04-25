@@ -12,7 +12,6 @@ import {
   type StudyScreening,
   type StudySession,
 } from "@/lib/studySession";
-import { TARGET_CAREERS, type TargetCareer } from "@/lib/targetCareers";
 
 type FlowStep = "consent" | "screening" | "questionnaire";
 
@@ -22,16 +21,6 @@ function inferStep(session: StudySession): FlowStep {
   if (!session.predictions?.length) return "questionnaire";
   return "questionnaire";
 }
-
-const EDUCATION_OPTIONS = [
-  "",
-  "High school or equivalent",
-  "Some college / associate coursework",
-  "Bachelor's degree",
-  "Master's degree or higher",
-  "Doctorate / professional degree",
-  "Prefer not to say",
-];
 
 export default function StudyFlowClient() {
   const router = useRouter();
@@ -44,10 +33,6 @@ export default function StudyFlowClient() {
   const [tenureYears, setTenureYears] = useState("");
   const [tenureMonths, setTenureMonths] = useState("");
   const [satisfaction, setSatisfaction] = useState<1 | 2 | 3 | 4 | 5 | 0>(0);
-  const [careerField, setCareerField] = useState<TargetCareer | "">("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [workExpYears, setWorkExpYears] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
   const [sessionId, setSessionId] = useState("");
 
   const restart = searchParams.get("restart") === "1";
@@ -78,10 +63,6 @@ export default function StudyFlowClient() {
       setTenureYears(String(session.screening.tenureYears));
       setTenureMonths(String(session.screening.tenureMonths));
       setSatisfaction(session.screening.jobSatisfaction);
-      setCareerField(session.screening.selfReportedCareerField);
-      setJobTitle(session.screening.jobTitle);
-      setWorkExpYears(session.screening.totalWorkExperienceYears);
-      setEducationLevel(session.screening.educationLevel);
     }
     setHydrated(true);
   }, [restart, router]);
@@ -106,20 +87,12 @@ export default function StudyFlowClient() {
     const y = Math.max(0, parseInt(tenureYears, 10) || 0);
     const m = Math.max(0, Math.min(11, parseInt(tenureMonths, 10) || 0));
     const totalMonths = y * 12 + m;
-    if (!careerField) {
-      alert("Please select your current career field.");
-      return;
-    }
     const screening: StudyScreening = {
       participantName: name.trim(),
       tenureYears: y,
       tenureMonths: m,
       totalMonthsTenure: totalMonths,
       jobSatisfaction: satisfaction as 1 | 2 | 3 | 4 | 5,
-      selfReportedCareerField: careerField,
-      jobTitle: jobTitle.trim(),
-      totalWorkExperienceYears: workExpYears.trim(),
-      educationLevel: educationLevel.trim(),
     };
     const err = validateScreening(screening);
     if (err) {
@@ -179,13 +152,13 @@ export default function StudyFlowClient() {
                 <strong>Purpose.</strong> You are invited to take part in a validation study for a
                 college–career field recommendation tool developed for thesis research. We are
                 surveying employees who work in one of fourteen career fields to test whether the
-                model’s top recommendations align with participants’ self-reported field, especially
-                when they are generally satisfied with their current job.
+                model’s top recommendations align with participants who are already working in
+                relevant career areas, especially when they are generally satisfied with their current job.
               </p>
               <p>
                 <strong>What you will do.</strong> You will review this consent form, answer a few
-                background questions (including your name, time in your current role, job
-                satisfaction, and your current career field), complete a 30-item questionnaire, view
+                background questions (including your name, time in your current role, and job
+                satisfaction), complete a 30-item questionnaire, view
                 three recommended college fields, and answer a short follow-up about how those
                 recommendations relate to your own field and interests.
               </p>
@@ -344,71 +317,6 @@ export default function StudyFlowClient() {
                   </label>
                 ))}
               </div>
-            </div>
-
-            <div>
-              <label htmlFor="career-field" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Which career field best describes your current job? <span className="text-[#dc2626]">*</span>
-              </label>
-              <select
-                id="career-field"
-                value={careerField}
-                onChange={(e) => setCareerField(e.target.value as TargetCareer | "")}
-                className="w-full rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-              >
-                <option value="">Select one…</option>
-                {TARGET_CAREERS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="job-title" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Current job title <span className="font-normal text-[#a3a3a3]">(optional)</span>
-              </label>
-              <input
-                id="job-title"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="w-full rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] placeholder:text-[#737373] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="work-exp" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Total years of work experience <span className="font-normal text-[#a3a3a3]">(optional)</span>
-              </label>
-              <input
-                id="work-exp"
-                type="number"
-                min={0}
-                step={0.5}
-                value={workExpYears}
-                onChange={(e) => setWorkExpYears(e.target.value)}
-                placeholder="e.g. 8"
-                className="w-full max-w-xs rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] placeholder:text-[#737373] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="edu" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Highest education level <span className="font-normal text-[#a3a3a3]">(optional)</span>
-              </label>
-              <select
-                id="edu"
-                value={educationLevel}
-                onChange={(e) => setEducationLevel(e.target.value)}
-                className="w-full rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-              >
-                {EDUCATION_OPTIONS.map((opt) => (
-                  <option key={opt || "unset"} value={opt}>
-                    {opt || "Select…"}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div className="flex gap-3 pt-2">

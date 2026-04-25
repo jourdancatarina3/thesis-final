@@ -7,7 +7,6 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
 import { CAREER_DESCRIPTIONS } from "@/lib/careerDescriptions";
 import {
-  computeSelfReportedFieldInTop3,
   patchStudySession,
   readStudySession,
   STUDY_SESSION_STORAGE_KEY,
@@ -28,8 +27,6 @@ export default function ResultsPageClient() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [studyMode, setStudyMode] = useState(false);
-  const [selfReportedField, setSelfReportedField] = useState("");
-  const [computedInTop3, setComputedInTop3] = useState(false);
 
   const [fieldInTop3, setFieldInTop3] = useState<FieldInTop3Answer | "">("");
   const [rating1, setRating1] = useState<number>(0);
@@ -91,12 +88,6 @@ export default function ResultsPageClient() {
           session.predictions
       );
     setStudyMode(isStudy);
-    if (session?.screening) {
-      setSelfReportedField(session.screening.selfReportedCareerField);
-      setComputedInTop3(
-        computeSelfReportedFieldInTop3(session.screening.selfReportedCareerField, top3)
-      );
-    }
 
     setLoading(false);
   }, [searchParams, router]);
@@ -116,8 +107,6 @@ export default function ResultsPageClient() {
     if (!session?.screening || !session.questionnaireResponses || !session.predictions) return;
 
     setSubmittingFeedback(true);
-    const top3 = session.predictions.slice(0, 3);
-    const computed = computeSelfReportedFieldInTop3(session.screening.selfReportedCareerField, top3);
     const payload = {
       sessionId: session.sessionId,
       consentVersion: session.consentVersion,
@@ -126,7 +115,7 @@ export default function ResultsPageClient() {
       questionnaireResponses: session.questionnaireResponses,
       predictions: session.predictions,
       fieldInTop3,
-      computedSelfReportedInTop3: computed,
+      computedSelfReportedInTop3: false,
       feedbackSubmittedAt: new Date().toISOString(),
       ...(showRatingBlock
         ? { ratingTop1: rating1, ratingTop2: rating2, ratingTop3: rating3 }
@@ -228,17 +217,6 @@ export default function ResultsPageClient() {
                 Based on your responses, here are three college fields that match your profile.
               </p>
               <p className="text-sm text-gray-500 mt-2 italic">Listed in no particular order</p>
-              {studyMode && selfReportedField && (
-                <p className="text-sm text-gray-600 mt-4 max-w-lg mx-auto">
-                  You indicated your current field is:{" "}
-                  <span className="font-semibold text-gray-800">{selfReportedField}</span>
-                  {computedInTop3 ? (
-                    <span className="text-emerald-700"> (this label appears in the model top three.)</span>
-                  ) : (
-                    <span className="text-amber-800"> (string match: not in the three labels below.)</span>
-                  )}
-                </p>
-              )}
             </div>
 
             <div className="space-y-5 mb-12">
@@ -262,8 +240,7 @@ export default function ResultsPageClient() {
 
                 <div className="mb-6">
                   <p className="text-sm font-semibold text-gray-800 mb-3">
-                    Is your current career field (the one you selected at the start) among these three
-                    recommendations?
+                    Is your current job or career field represented among these three recommendations?
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2">
                     {(
