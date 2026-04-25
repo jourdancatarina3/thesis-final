@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import { isTenureBandId, tenureBandToParts } from "@/lib/studySession";
 
 /**
  * Persists validation-study rows to repo data/ (same cwd convention as /api/predict).
@@ -70,10 +71,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "screening.participantName is required." }, { status: 400 });
     }
 
-    const totalMonths = Number(screening.totalMonthsTenure);
-    if (!Number.isFinite(totalMonths) || totalMonths <= 0) {
-      return NextResponse.json({ error: "Invalid tenure." }, { status: 400 });
+    const bandRaw = typeof screening.tenureBand === "string" ? screening.tenureBand.trim() : "";
+    if (!isTenureBandId(bandRaw)) {
+      return NextResponse.json({ error: "Invalid or missing tenureBand." }, { status: 400 });
     }
+    const { tenureYears, tenureMonths, totalMonthsTenure: totalMonths } = tenureBandToParts(bandRaw);
 
     const sat = Number(screening.jobSatisfaction);
     if (!Number.isInteger(sat) || sat < 1 || sat > 5) {
@@ -131,8 +133,8 @@ export async function POST(request: NextRequest) {
       consent_timestamp: consentTimestamp,
       participant_name: name,
       tenure_total_months: totalMonths,
-      tenure_years_part: Number(screening.tenureYears) || 0,
-      tenure_months_part: Number(screening.tenureMonths) || 0,
+      tenure_years_part: tenureYears,
+      tenure_months_part: tenureMonths,
       job_satisfaction: sat,
       self_reported_career_field: field,
       job_title:

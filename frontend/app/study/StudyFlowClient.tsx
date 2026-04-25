@@ -1,16 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import QuestionnaireClient from "@/app/questionnaire/QuestionnaireClient";
 import {
   CONSENT_VERSION,
   ensureStudySession,
+  isTenureBandId,
   readStudySession,
+  TENURE_BAND_IDS,
+  TENURE_BAND_LABELS,
   validateScreening,
   writeStudySession,
   type StudyScreening,
   type StudySession,
+  type TenureBandId,
 } from "@/lib/studySession";
 
 type FlowStep = "consent" | "screening" | "questionnaire";
@@ -30,12 +34,34 @@ export default function StudyFlowClient() {
   const [hydrated, setHydrated] = useState(false);
 
   const [name, setName] = useState("");
-  const [tenureYears, setTenureYears] = useState("");
-  const [tenureMonths, setTenureMonths] = useState("");
+  const [tenureBand, setTenureBand] = useState<TenureBandId | "">("");
+  const [tenureMenuOpen, setTenureMenuOpen] = useState(false);
+  const tenureDropdownRef = useRef<HTMLDivElement>(null);
   const [satisfaction, setSatisfaction] = useState<1 | 2 | 3 | 4 | 5 | 0>(0);
   const [sessionId, setSessionId] = useState("");
 
   const restart = searchParams.get("restart") === "1";
+
+  useEffect(() => {
+    if (!tenureMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (tenureDropdownRef.current?.contains(e.target as Node)) return;
+      setTenureMenuOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTenureMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [tenureMenuOpen]);
+
+  useEffect(() => {
+    if (step !== "screening") setTenureMenuOpen(false);
+  }, [step]);
 
   useEffect(() => {
     if (!restart) return;
@@ -60,8 +86,9 @@ export default function StudyFlowClient() {
     setStep(inferStep(session));
     if (session.screening) {
       setName(session.screening.participantName);
-      setTenureYears(String(session.screening.tenureYears));
-      setTenureMonths(String(session.screening.tenureMonths));
+      if (isTenureBandId(session.screening.tenureBand)) {
+        setTenureBand(session.screening.tenureBand);
+      }
       setSatisfaction(session.screening.jobSatisfaction);
     }
     setHydrated(true);
@@ -84,14 +111,13 @@ export default function StudyFlowClient() {
   };
 
   const handleScreeningContinue = () => {
-    const y = Math.max(0, parseInt(tenureYears, 10) || 0);
-    const m = Math.max(0, Math.min(11, parseInt(tenureMonths, 10) || 0));
-    const totalMonths = y * 12 + m;
+    if (!isTenureBandId(tenureBand)) {
+      alert("Please select how long you have been in your current job or role.");
+      return;
+    }
     const screening: StudyScreening = {
       participantName: name.trim(),
-      tenureYears: y,
-      tenureMonths: m,
-      totalMonthsTenure: totalMonths,
+      tenureBand,
       jobSatisfaction: satisfaction as 1 | 2 | 3 | 4 | 5,
     };
     const err = validateScreening(screening);
@@ -180,8 +206,8 @@ export default function StudyFlowClient() {
                 research file under the project’s{" "}
                 <code className="rounded bg-[#f4f4f5] px-1 text-xs text-[#171717]">data/</code>{" "}
                 directory). Access is limited to the researcher(s) named in your ethics approval.
-                Your <strong>name is an identifier</strong>; if you prefer less identifiable linkage,
-                you may use a study code agreed with the researcher instead of your legal name.
+                Your <strong>full legal name</strong> is collected on the next screen as an identifier
+                for this study, in line with your ethics approval and data-handling procedures.
               </p>
               <p>
                 <strong>Ethics review.</strong> This study should be conducted in line with your
@@ -235,53 +261,106 @@ export default function StudyFlowClient() {
 
             <div>
               <label htmlFor="participant-name" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Full name or study code <span className="text-[#dc2626]">*</span>
+                Full name <span className="text-[#dc2626]">*</span>
               </label>
+              <p className="mb-1.5 text-xs leading-relaxed text-[#707070]">
+                Enter your complete legal name (given and family name as applicable). Do not use a
+                nickname or study code.
+              </p>
               <input
                 id="participant-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] placeholder:text-[#737373] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
+                placeholder="e.g. Maria Santos Reyes"
                 autoComplete="name"
+                inputMode="text"
+                className="w-full rounded-lg border border-[#d4d4d8] bg-white px-3 py-2.5 text-sm text-[#171717] placeholder:text-[#a3a3a3] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
               />
             </div>
 
-            <div>
-              <span className="mb-2 block text-sm font-semibold text-[#171717]">
+            <div className="space-y-2">
+              <p id="tenure-field-label" className="text-sm font-semibold text-[#171717]">
                 How long have you been in your current job or role? <span className="text-[#dc2626]">*</span>
-              </span>
-              <div className="flex flex-wrap gap-4 items-end">
-                <div>
-                  <label htmlFor="ty" className="mb-1 block text-xs text-[#707070]">
-                    Years
-                  </label>
-                  <input
-                    id="ty"
-                    type="number"
-                    min={0}
-                    value={tenureYears}
-                    onChange={(e) => setTenureYears(e.target.value)}
-                    className="w-24 rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="tm" className="mb-1 block text-xs text-[#707070]">
-                    Additional months (0–11)
-                  </label>
-                  <input
-                    id="tm"
-                    type="number"
-                    min={0}
-                    max={11}
-                    value={tenureMonths}
-                    onChange={(e) => setTenureMonths(e.target.value)}
-                    className="w-24 rounded-lg border border-[#d4d4d8] bg-white px-3 py-2 text-sm text-[#171717] focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#a5b4fc]"
-                  />
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-[#707070]">
-                Enter at least one non-zero value between years and months.
               </p>
+              <p id="tenure-field-hint" className="text-xs leading-relaxed text-[#707070]">
+                Open the menu, pick the closest match, then tap outside or press Esc to close. You can
+                change your answer before continuing.
+              </p>
+              <div ref={tenureDropdownRef} className="relative max-w-lg">
+                <button
+                  type="button"
+                  id="tenure-band-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={tenureMenuOpen}
+                  aria-controls="tenure-band-listbox"
+                  aria-labelledby="tenure-field-label"
+                  aria-describedby="tenure-field-hint"
+                  onClick={() => setTenureMenuOpen((o) => !o)}
+                  className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-xl border-2 bg-white px-4 py-3.5 text-left text-[15px] font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#a5b4fc] focus:ring-offset-2 focus:ring-offset-[#f4f7fa] active:scale-[0.998] ${
+                    tenureBand
+                      ? "border-[#4f46e5] text-[#171717]"
+                      : "border-[#d4d4d8] text-[#737373] hover:border-[#a3a3a3]"
+                  } ${tenureMenuOpen ? "border-[#4f46e5] ring-2 ring-[#c7d2fe] ring-offset-2 ring-offset-[#f4f7fa]" : ""}`}
+                >
+                  <span className={tenureBand ? "text-[#171717]" : "text-[#737373]"}>
+                    {tenureBand ? TENURE_BAND_LABELS[tenureBand] : "Choose length of time in this role…"}
+                  </span>
+                  <svg
+                    className={`h-5 w-5 shrink-0 text-[#525252] transition-transform duration-200 ${
+                      tenureMenuOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {tenureMenuOpen && (
+                  <ul
+                    id="tenure-band-listbox"
+                    role="listbox"
+                    aria-labelledby="tenure-field-label"
+                    className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[min(320px,70vh)] overflow-auto rounded-xl border-2 border-[#e5e5e5] bg-white py-1.5 shadow-xl ring-1 ring-black/5"
+                  >
+                    {TENURE_BAND_IDS.map((id) => {
+                      const selected = tenureBand === id;
+                      return (
+                        <li key={id} role="presentation" className="px-1.5">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setTenureBand(id);
+                              setTenureMenuOpen(false);
+                            }}
+                            className={`flex min-h-[48px] w-full items-center justify-between gap-3 rounded-lg px-3.5 py-3 text-left text-sm font-medium transition-colors ${
+                              selected
+                                ? "bg-[#eef2ff] text-[#312e81]"
+                                : "text-[#404040] hover:bg-[#f4f4f5] active:bg-[#ebebeb]"
+                            }`}
+                          >
+                            <span>{TENURE_BAND_LABELS[id]}</span>
+                            {selected && (
+                              <svg
+                                className="h-5 w-5 shrink-0 text-[#4f46e5]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
 
             <div>
