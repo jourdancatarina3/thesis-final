@@ -157,19 +157,25 @@ export default function StudyFlowClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fa] px-4 py-8">
+    <div className="min-h-screen bg-[#f4f7fa] px-4 py-5 sm:py-8">
       <div className="mx-auto max-w-3xl">
-        <p className="mb-8 text-center text-sm font-medium text-[#4f46e5]">{stepLabel}</p>
+        <p
+          className={`mb-6 text-center text-xs font-medium text-[#4f46e5] sm:mb-8 sm:text-sm ${
+            step === "questionnaire" ? "hidden sm:block" : ""
+          }`}
+        >
+          {stepLabel}
+        </p>
 
         {step === "consent" && (
           <div className="overflow-hidden rounded-2xl border border-[#e5e5e5] bg-[#ffffff] shadow-lg">
-            <div className="border-b border-[#e5e5e5] p-6 md:p-8">
-              <h1 className="mb-2 text-2xl font-bold text-[#0a0a0a]">Informed consent</h1>
+            <div className="border-b border-[#e5e5e5] p-4 sm:p-6 md:p-8">
+              <h1 className="mb-2 text-xl font-bold text-[#0a0a0a] sm:text-2xl">Informed consent</h1>
               <p className="text-sm text-[#525252]">
                 Please read carefully before you continue.
               </p>
             </div>
-            <div className="max-h-[55vh] space-y-4 overflow-y-auto px-6 py-6 text-sm leading-relaxed text-[#404040] md:px-8">
+            <div className="max-h-[55vh] space-y-4 overflow-y-auto px-4 py-5 text-sm leading-relaxed text-[#404040] sm:px-6 sm:py-6 md:px-8">
               <p>
                 <strong>Purpose.</strong> You are invited to take part in a validation study for a
                 college–career field recommendation tool developed for thesis research. We are
@@ -221,7 +227,7 @@ export default function StudyFlowClient() {
                 have read this information, and you agree to participate under these terms.
               </p>
             </div>
-            <div className="space-y-4 border-t border-[#e5e5e5] bg-[#fafafa] p-6 md:p-8">
+            <div className="space-y-4 border-t border-[#e5e5e5] bg-[#fafafa] p-4 sm:p-6 md:p-8">
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
@@ -250,8 +256,8 @@ export default function StudyFlowClient() {
         )}
 
         {step === "screening" && (
-          <div className="space-y-6 rounded-2xl border border-[#e5e5e5] bg-[#ffffff] p-6 shadow-lg md:p-8">
-            <h1 className="text-2xl font-bold text-[#0a0a0a]">About you and your current role</h1>
+          <div className="space-y-5 rounded-2xl border border-[#e5e5e5] bg-[#ffffff] p-4 shadow-lg sm:space-y-6 sm:p-6 md:p-8">
+            <h1 className="text-xl font-bold text-[#0a0a0a] sm:text-2xl">About you and your current role</h1>
             <p className="text-sm text-[#525252]">
               These answers help interpret validation results. All items in this section are used
               only for research as described in the consent form.
@@ -407,7 +413,7 @@ export default function StudyFlowClient() {
               <button
                 type="button"
                 onClick={handleScreeningContinue}
-                className="flex-1 rounded-xl bg-[#4f46e5] py-3 font-semibold text-white shadow-md hover:bg-[#4338ca]"
+                className="flex-1 rounded-xl bg-[#4f46e5] py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#4338ca] sm:py-3 sm:text-base"
               >
                 Continue to questionnaire
               </button>

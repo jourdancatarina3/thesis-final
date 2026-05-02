@@ -19,21 +19,21 @@ export default function QuestionCard({
 }: QuestionCardProps) {
   return (
     <div
-      className={`rounded-2xl border-2 border-[#e5e5e5] bg-white p-6 shadow-lg transition-all duration-300 md:p-8 ${
+      className={`rounded-2xl border-2 border-[#e5e5e5] bg-white p-4 shadow-lg transition-all duration-300 sm:p-6 md:p-8 ${
         isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
       }`}
     >
-      <h2 className="mb-6 text-xl font-bold leading-relaxed text-[#171717] md:text-2xl">
+      <h2 className="mb-4 text-lg font-bold leading-snug text-[#171717] sm:mb-6 sm:text-xl md:text-2xl md:leading-relaxed">
         {question.question}
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
         {question.options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           return (
             <button
               key={index}
               onClick={() => onAnswerSelect(index)}
-              className={`w-full transform rounded-xl border-2 p-4 text-left transition-all duration-200 hover:scale-[1.02] md:p-5 ${
+              className={`w-full transform rounded-xl border-2 p-3 text-left transition-all duration-200 hover:scale-[1.02] sm:p-4 md:p-5 ${
                 isSelected
                   ? "border-[#2563eb] bg-gradient-to-r from-[#eff6ff] to-[#eef2ff] shadow-md ring-2 ring-[#bfdbfe]"
                   : "border-[#d4d4d8] bg-white hover:border-[#93c5fd] hover:bg-[#f8fafc] hover:shadow-sm"
@@ -54,7 +54,7 @@ export default function QuestionCard({
                   )}
                 </div>
                 <span
-                  className={`flex-1 text-base md:text-lg ${
+                  className={`flex-1 text-sm sm:text-base md:text-lg ${
                     isSelected ? "font-semibold text-[#1e3a8a]" : "text-[#404040]"
                   }`}
                 >

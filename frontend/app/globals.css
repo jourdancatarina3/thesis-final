@@ -18,6 +18,14 @@ html {
   background-color: var(--background);
 }
 
+/* Slightly smaller type scale on narrow viewports (Tailwind rem utilities follow root font size). */
+@media (max-width: 639px) {
+  html {
+    font-size: 93.75%;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
 body {
   color: var(--foreground);
   background-color: var(--background);

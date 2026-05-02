@@ -9,7 +9,7 @@ function QuestionnaireFallback() {
           <div className="absolute left-0 top-0 h-full w-full rounded-full border-4 border-[#bfdbfe]" />
           <div className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-4 border-[#2563eb] border-t-transparent" />
         </div>
-        <p className="text-lg text-[#525252]">Loading questionnaire...</p>
+        <p className="text-base text-[#525252] sm:text-lg">Loading questionnaire...</p>
       </div>
     </div>
   );

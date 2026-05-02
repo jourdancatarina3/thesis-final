@@ -321,7 +321,7 @@ export default function QuestionnaireClient({
             <div className="absolute left-0 top-0 h-full w-full rounded-full border-4 border-[#bfdbfe]"></div>
             <div className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-4 border-[#2563eb] border-t-transparent"></div>
           </div>
-          <p className="text-lg text-[#525252]">Loading questionnaire...</p>
+          <p className="text-base text-[#525252] sm:text-lg">Loading questionnaire...</p>
         </div>
       </div>
     );
@@ -343,20 +343,20 @@ export default function QuestionnaireClient({
   const shuffledSelectedAnswer = getShuffledAnswerIndex(answers[currentQuestionIndex]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-5 px-4 sm:py-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+        {/* Header — hidden below sm to save vertical space on phones */}
+        <div className="mb-5 hidden text-center sm:mb-8 sm:block">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-3xl md:text-4xl">
             {shuffledQuestionnaire.title}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600 sm:text-base">
             {shuffledQuestionnaire.description}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-md p-4 mb-4 border border-gray-100 sm:p-6 sm:mb-6">
           <ProgressBar
             current={currentQuestionIndex + 1}
             total={shuffledQuestionnaire.total_questions}
@@ -364,7 +364,7 @@ export default function QuestionnaireClient({
         </div>
 
         {/* Question Card */}
-        <div className="mb-8">
+        <div className="mb-5 sm:mb-8">
           <QuestionCard
             question={currentQuestion}
             selectedAnswer={shuffledSelectedAnswer}
@@ -375,11 +375,11 @@ export default function QuestionnaireClient({
 
         {/* Navigation */}
         <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center bg-white rounded-xl shadow-md p-6 border border-gray-100">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-xl shadow-md p-4 border border-gray-100 sm:p-6">
             <button
               onClick={handlePrevious}
               disabled={currentQuestionIndex === 0 || isSubmitting}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 sm:px-6 sm:py-3 sm:text-base ${
                 currentQuestionIndex === 0 || isSubmitting
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-gray-600 text-white hover:bg-gray-700 hover:shadow-lg transform hover:-translate-y-0.5"
@@ -391,7 +391,7 @@ export default function QuestionnaireClient({
               Previous
             </button>
 
-            <div className="text-sm text-gray-500 font-medium">
+            <div className="text-xs text-gray-500 font-medium sm:text-sm">
               {currentQuestionIndex + 1} / {shuffledQuestionnaire.total_questions}
             </div>
 
@@ -399,7 +399,7 @@ export default function QuestionnaireClient({
               <button
                 onClick={() => handleSubmit()}
                 disabled={isSubmitting}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 sm:px-6 sm:py-3 sm:text-base ${
                   isSubmitting
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5"

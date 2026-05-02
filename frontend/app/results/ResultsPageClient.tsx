@@ -178,16 +178,16 @@ export default function ResultsPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 py-12 px-4">
+    <div className="min-h-screen bg-stone-50 py-6 px-4 sm:py-12">
       <div className="max-w-5xl mx-auto">
         {thankYou ? (
-          <div className="text-center mb-12 max-w-xl mx-auto bg-white rounded-xl shadow-md p-10 border border-emerald-100">
+          <div className="text-center mb-8 max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 border border-emerald-100 sm:mb-12 sm:p-10">
             <div className="inline-block p-3 bg-emerald-100 rounded-full mb-4">
-              <svg className="w-10 h-10 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Thank you</h1>
+            <h1 className="text-xl font-bold text-gray-900 mb-2 sm:text-2xl">Thank you</h1>
             <p className="text-gray-600 mb-6">
               Your answers have been saved for the research study. You may close this window.
             </p>
@@ -204,22 +204,22 @@ export default function ResultsPageClient() {
           </div>
         ) : (
           <>
-            <div className="text-center mb-12">
-              <div className="inline-block p-4 bg-slate-100 rounded-full mb-4">
-                <svg className="w-12 h-12 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center mb-8 sm:mb-12">
+              <div className="inline-block p-3 sm:p-4 bg-slate-100 rounded-full mb-3 sm:mb-4">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-3xl md:text-4xl">
                 Your college field recommendations
               </h1>
-              <p className="text-lg text-gray-600 max-w-xl mx-auto">
+              <p className="text-base text-gray-600 max-w-xl mx-auto sm:text-lg">
                 Based on your responses, here are three college fields that match your profile.
               </p>
               <p className="text-sm text-gray-500 mt-2 italic">Listed in no particular order</p>
             </div>
 
-            <div className="space-y-5 mb-12">
+            <div className="space-y-4 mb-8 sm:space-y-5 sm:mb-12">
               {predictions.map((prediction, index) => (
                 <ResultsCard
                   key={prediction.career + String(index)}
@@ -231,8 +231,8 @@ export default function ResultsPageClient() {
             </div>
 
             {studyMode && !thankYou && (
-              <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-indigo-100 mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Quick validation</h2>
+              <div className="bg-white rounded-xl shadow-md p-5 md:p-8 border border-indigo-100 mb-6 sm:mb-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-2 sm:text-xl">Quick validation</h2>
                 <p className="text-sm text-gray-600 mb-6">
                   Your answers help assess how well these recommendations align with people already working
                   in each career field.
@@ -320,9 +320,9 @@ export default function ResultsPageClient() {
               </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-md p-8 md:p-12 text-center border border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Next steps</h2>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed max-w-2xl mx-auto">
+            <div className="bg-white rounded-xl shadow-md p-5 md:p-12 text-center border border-gray-200 sm:p-8">
+              <h2 className="text-xl font-bold text-gray-800 mb-3 sm:text-2xl sm:mb-4">Next steps</h2>
+              <p className="text-gray-600 mb-6 text-base leading-relaxed max-w-2xl mx-auto sm:mb-8 sm:text-lg">
                 {studyMode
                   ? "If you need to start over with a new session, use the button below. Your completed response has been or will be saved when you submit the validation section above."
                   : "Consider exploring these college fields further. Research each option and speak with people in these areas to see what fits your goals."}
@@ -330,13 +330,13 @@ export default function ResultsPageClient() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href={studyMode ? "/study?restart=1" : "/questionnaire"}
-                  className="px-8 py-4 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-6 py-3 text-sm bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-base"
                 >
                   {studyMode ? "Start a new study session" : "Retake questionnaire"}
                 </Link>
                 <Link
                   href="/"
-                  className="px-8 py-4 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
+                  className="px-6 py-3 text-sm bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg sm:px-8 sm:py-4 sm:text-base"
                 >
                   Back to home
                 </Link>
