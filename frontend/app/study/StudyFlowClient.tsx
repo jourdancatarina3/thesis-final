@@ -159,18 +159,14 @@ export default function StudyFlowClient() {
   return (
     <div className="min-h-screen bg-[#f4f7fa] px-4 py-8">
       <div className="mx-auto max-w-3xl">
-        <p className="mb-2 text-center text-sm font-medium text-[#4f46e5]">{stepLabel}</p>
-        <p className="mb-8 text-center text-xs text-[#707070]">
-          Research validation survey — approximately 12–18 minutes
-        </p>
+        <p className="mb-8 text-center text-sm font-medium text-[#4f46e5]">{stepLabel}</p>
 
         {step === "consent" && (
           <div className="overflow-hidden rounded-2xl border border-[#e5e5e5] bg-[#ffffff] shadow-lg">
             <div className="border-b border-[#e5e5e5] p-6 md:p-8">
               <h1 className="mb-2 text-2xl font-bold text-[#0a0a0a]">Informed consent</h1>
               <p className="text-sm text-[#525252]">
-                Please read carefully before you continue. Replace bracketed placeholders with your
-                institution and contact details before deployment.
+                Please read carefully before you continue.
               </p>
             </div>
             <div className="max-h-[55vh] space-y-4 overflow-y-auto px-6 py-6 text-sm leading-relaxed text-[#404040] md:px-8">
@@ -210,12 +206,14 @@ export default function StudyFlowClient() {
                 for this study, in line with your ethics approval and data-handling procedures.
               </p>
               <p>
-                <strong>Ethics review.</strong> This study should be conducted in line with your
-                institution’s ethics / IRB requirements. [Insert IRB or ethics approval reference,
-                or state if exempt, as applicable.]
-              </p>
-              <p>
-                <strong>Contact.</strong> [Principal investigator name, email, and institution.]
+                <strong>Contact.</strong> Jourdan Ken D. Catarina,{" "}
+                <a
+                  href="mailto:jdcatarina@up.edu.ph"
+                  className="text-[#4338ca] underline underline-offset-2 hover:text-[#3730a3]"
+                >
+                  jdcatarina@up.edu.ph
+                </a>
+                , University of the Philippines Cebu.
               </p>
               <p>
                 <strong>Consent.</strong> By checking the box below and continuing, you confirm that
