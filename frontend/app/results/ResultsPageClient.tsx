@@ -332,7 +332,7 @@ export default function ResultsPageClient() {
                   href={studyMode ? "/study?restart=1" : "/questionnaire"}
                   className="px-6 py-3 text-sm bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:px-8 sm:py-4 sm:text-base"
                 >
-                  {studyMode ? "Start a new study session" : "Retake questionnaire"}
+                  {studyMode ? "Take the survey again" : "Retake questionnaire"}
                 </Link>
                 <Link
                   href="/"
