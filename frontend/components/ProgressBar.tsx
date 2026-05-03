@@ -7,18 +7,17 @@ export default function ProgressBar({ current, total }: ProgressBarProps) {
   const percentage = Math.min((current / total) * 100, 100);
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-2 sm:mb-3">
-        <span className="text-xs font-semibold text-[#404040] sm:text-sm">
-          Question {current} of {total}
-        </span>
-        <span className="text-xs font-semibold text-[#404040] sm:text-sm">
-          {Math.round(percentage)}%
-        </span>
-      </div>
+    <div
+      className="w-full"
+      role="progressbar"
+      aria-valuenow={Math.round(percentage)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Your progress through this questionnaire"
+    >
       <div className="h-3 w-full overflow-hidden rounded-full bg-[#e5e5e5] shadow-inner sm:h-4">
         <div
-          className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 sm:h-4 rounded-full transition-all duration-500 ease-out shadow-md"
+          className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md transition-all duration-500 ease-out sm:h-4"
           style={{ width: `${percentage}%` }}
         />
       </div>

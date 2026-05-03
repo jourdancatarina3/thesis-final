@@ -391,10 +391,6 @@ export default function QuestionnaireClient({
               Previous
             </button>
 
-            <div className="text-xs text-gray-500 font-medium sm:text-sm">
-              {currentQuestionIndex + 1} / {shuffledQuestionnaire.total_questions}
-            </div>
-
             {isLastQuestion && allAnswered && (
               <button
                 onClick={() => handleSubmit()}
