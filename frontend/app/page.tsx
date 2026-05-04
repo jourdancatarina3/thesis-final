@@ -1,8 +1,10 @@
 import Link from "next/link";
+import WelcomeModal from "@/components/WelcomeModal";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8 sm:py-12">
+      <WelcomeModal />
       <main className="w-full max-w-4xl mx-auto text-center">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-3 sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

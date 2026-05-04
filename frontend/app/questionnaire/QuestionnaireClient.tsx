@@ -345,7 +345,7 @@ export default function QuestionnaireClient({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-5 px-4 sm:py-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header — hidden below sm to save vertical space on phones */}
+        {/* Header: hidden below sm to save vertical space on phones */}
         <div className="mb-5 hidden text-center sm:mb-8 sm:block">
           <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-3xl md:text-4xl">
             {shuffledQuestionnaire.title}
