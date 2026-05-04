@@ -33,10 +33,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "screening object is required." }, { status: 400 });
     }
 
-    const name = typeof screening.participantName === "string" ? screening.participantName.trim() : "";
-    if (!name) {
-      return NextResponse.json({ error: "screening.participantName is required." }, { status: 400 });
-    }
+    const name =
+      typeof screening.participantName === "string" ? screening.participantName.trim() : "";
 
     const bandRaw = typeof screening.tenureBand === "string" ? screening.tenureBand.trim() : "";
     if (!isTenureBandId(bandRaw)) {

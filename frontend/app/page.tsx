@@ -33,8 +33,8 @@ export default function Home() {
               </div>
               <h3 className="font-bold text-lg text-gray-800 mb-2 sm:mb-3 sm:text-xl">Consent and background</h3>
               <p className="text-gray-600 leading-relaxed">
-                Read the informed consent, confirm participation, then share your name, time in your
-                current role, and job satisfaction.
+                Read the informed consent, confirm participation, then answer questions about your time
+                in your current role and job satisfaction (name optional).
               </p>
             </div>
             <div className="flex flex-col items-start">

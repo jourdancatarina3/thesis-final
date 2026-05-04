@@ -185,8 +185,8 @@ export default function StudyFlowClient() {
               </p>
               <p>
                 <strong>What you will do.</strong> You will review this consent form, answer a few
-                background questions (including your name, time in your current role, and job
-                satisfaction), complete a 30-item questionnaire, view
+                background questions (time in your current role, job satisfaction, and optionally
+                your name), complete a 30-item questionnaire, view
                 three recommended college fields, and answer a short follow-up about how those
                 recommendations relate to your own field and interests.
               </p>
@@ -208,8 +208,9 @@ export default function StudyFlowClient() {
                 research file under the project’s{" "}
                 <code className="rounded bg-[#f4f4f5] px-1 text-xs text-[#171717]">data/</code>{" "}
                 directory). Access is limited to the researcher(s) named in your ethics approval.
-                Your <strong>full legal name</strong> is collected on the next screen as an identifier
-                for this study, in line with your ethics approval and data-handling procedures.
+                On the next screen you may optionally provide your <strong>full legal name</strong> as
+                an identifier; if you leave it blank, your session is still tied to a random study ID
+                stored in this browser.
               </p>
               <p>
                 <strong>Contact.</strong> Jourdan Ken D. Catarina,{" "}
@@ -265,11 +266,11 @@ export default function StudyFlowClient() {
 
             <div>
               <label htmlFor="participant-name" className="mb-1 block text-sm font-semibold text-[#171717]">
-                Full name <span className="text-[#dc2626]">*</span>
+                Full name <span className="font-normal text-[#707070]">(optional)</span>
               </label>
               <p className="mb-1.5 text-xs leading-relaxed text-[#707070]">
-                Enter your complete legal name (given and family name as applicable). Do not use a
-                nickname or study code.
+                If you provide it, use your complete legal name (given and family name as applicable).
+                Do not use a nickname or study code. You may leave this blank.
               </p>
               <input
                 id="participant-name"

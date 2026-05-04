@@ -116,8 +116,6 @@ export function ensureStudySession(): StudySession {
 }
 
 export function validateScreening(s: StudyScreening): string | null {
-  const n = s.participantName.trim();
-  if (!n || n.length < 2) return "Please enter your full name.";
   if (!isTenureBandId(s.tenureBand)) return "Please select how long you have been in your current job or role.";
   if (s.jobSatisfaction < 1 || s.jobSatisfaction > 5) return "Please rate your job satisfaction.";
   return null;
