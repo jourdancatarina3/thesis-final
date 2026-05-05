@@ -65,9 +65,6 @@ export interface StudySession {
   predictions?: PredictionItem[];
   questionnaireSubmittedAt?: string;
   fieldInTop3?: FieldInTop3Answer;
-  ratingTop1?: number;
-  ratingTop2?: number;
-  ratingTop3?: number;
   feedbackSubmittedAt?: string;
 }
 

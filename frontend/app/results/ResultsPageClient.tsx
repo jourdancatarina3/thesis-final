@@ -29,9 +29,6 @@ export default function ResultsPageClient() {
   const [studyMode, setStudyMode] = useState(false);
 
   const [fieldInTop3, setFieldInTop3] = useState<FieldInTop3Answer | "">("");
-  const [rating1, setRating1] = useState<number>(0);
-  const [rating2, setRating2] = useState<number>(0);
-  const [rating3, setRating3] = useState<number>(0);
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [thankYou, setThankYou] = useState(false);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
@@ -92,14 +89,10 @@ export default function ResultsPageClient() {
     setLoading(false);
   }, [searchParams, router]);
 
-  const showRatingBlock = fieldInTop3 === "no" || fieldInTop3 === "not_sure";
-
   const canSubmitFeedback = useMemo(() => {
     if (!studyMode || thankYou) return false;
-    if (!fieldInTop3) return false;
-    if (fieldInTop3 === "yes") return true;
-    return rating1 >= 1 && rating1 <= 5 && rating2 >= 1 && rating2 <= 5 && rating3 >= 1 && rating3 <= 5;
-  }, [studyMode, thankYou, fieldInTop3, rating1, rating2, rating3]);
+    return Boolean(fieldInTop3);
+  }, [studyMode, thankYou, fieldInTop3]);
 
   const handleFeedbackSubmit = useCallback(async () => {
     if (!canSubmitFeedback || !fieldInTop3) return;
@@ -107,19 +100,15 @@ export default function ResultsPageClient() {
     if (!session?.screening || !session.questionnaireResponses || !session.predictions) return;
 
     setSubmittingFeedback(true);
+    const feedbackSubmittedAt = new Date().toISOString();
     const payload = {
       sessionId: session.sessionId,
       consentVersion: session.consentVersion,
-      consentTimestamp: session.consentTimestamp,
       screening: session.screening,
       questionnaireResponses: session.questionnaireResponses,
       predictions: session.predictions,
       fieldInTop3,
       computedSelfReportedInTop3: false,
-      feedbackSubmittedAt: new Date().toISOString(),
-      ...(showRatingBlock
-        ? { ratingTop1: rating1, ratingTop2: rating2, ratingTop3: rating3 }
-        : {}),
     };
 
     try {
@@ -134,10 +123,7 @@ export default function ResultsPageClient() {
       }
       patchStudySession({
         fieldInTop3,
-        ratingTop1: showRatingBlock ? rating1 : undefined,
-        ratingTop2: showRatingBlock ? rating2 : undefined,
-        ratingTop3: showRatingBlock ? rating3 : undefined,
-        feedbackSubmittedAt: payload.feedbackSubmittedAt,
+        feedbackSubmittedAt,
       });
       setThankYou(true);
     } catch (e) {
@@ -146,14 +132,7 @@ export default function ResultsPageClient() {
     } finally {
       setSubmittingFeedback(false);
     }
-  }, [
-    canSubmitFeedback,
-    fieldInTop3,
-    showRatingBlock,
-    rating1,
-    rating2,
-    rating3,
-  ]);
+  }, [canSubmitFeedback, fieldInTop3]);
 
   if (loading) {
     return (
@@ -270,40 +249,6 @@ export default function ResultsPageClient() {
                     ))}
                   </div>
                 </div>
-
-                {showRatingBlock && (
-                  <div className="space-y-6 mb-6 border-t border-gray-100 pt-6">
-                    <p className="text-sm text-gray-700">
-                      For each recommendation below, how close is it to college fields or career directions you
-                      would personally consider? (1 = not at all, 5 = very close)
-                    </p>
-                    {predictions.slice(0, 3).map((p, i) => {
-                      const setR = i === 0 ? setRating1 : i === 1 ? setRating2 : setRating3;
-                      const r = i === 0 ? rating1 : i === 1 ? rating2 : rating3;
-                      return (
-                        <div key={p.career} className="rounded-lg border border-gray-100 p-4 bg-gray-50/80">
-                          <p className="text-sm font-semibold text-gray-900 mb-2">{p.career}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {[1, 2, 3, 4, 5].map((n) => (
-                              <button
-                                key={n}
-                                type="button"
-                                onClick={() => setR(n)}
-                                className={`min-w-[2.5rem] py-2 rounded-lg text-sm font-medium border-2 transition-all ${
-                                  r === n
-                                    ? "border-indigo-600 bg-indigo-600 text-white"
-                                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-                                }`}
-                              >
-                                {n}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
 
                 <button
                   type="button"
