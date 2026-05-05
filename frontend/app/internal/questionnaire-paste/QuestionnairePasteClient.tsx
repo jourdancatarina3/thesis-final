@@ -59,6 +59,16 @@ function parseSatisfactionLine(line: string): 1 | 2 | 3 | 4 | 5 {
   );
 }
 
+/** So pasted text still matches when copy sources use curly apostrophes, NBSP, or extra spaces. */
+function normalizeOptionLine(s: string): string {
+  return s
+    .trim()
+    .replace(/\u00a0/g, " ")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/\s+/g, " ");
+}
+
 interface QuestionnaireQuestion {
   id: number;
   category: string;
@@ -201,15 +211,18 @@ export default function QuestionnairePasteClient() {
     try {
       const presetAnswers: number[] = questionnaire.questions.map(
         (q: QuestionnaireQuestion, idx: number) => {
-          const desired = questionLines[idx];
-          let optionIndex = q.options.indexOf(desired);
+          const desiredRaw = questionLines[idx];
+          const desiredNorm = normalizeOptionLine(desiredRaw);
+          let optionIndex = q.options.findIndex((opt: string) => normalizeOptionLine(opt) === desiredNorm);
           if (optionIndex === -1) {
-            const lowerDesired = desired.toLowerCase();
-            optionIndex = q.options.findIndex((opt: string) => opt.toLowerCase() === lowerDesired);
+            const lowerDesired = desiredNorm.toLowerCase();
+            optionIndex = q.options.findIndex(
+              (opt: string) => normalizeOptionLine(opt).toLowerCase() === lowerDesired
+            );
           }
           if (optionIndex === -1) {
             throw new Error(
-              `Could not find an option matching your answer for question ${q.id}:\n"${desired}"`
+              `Could not find an option matching your answer for question ${q.id}:\n"${desiredRaw.trim()}"`
             );
           }
           return optionIndex;
@@ -296,7 +309,9 @@ export default function QuestionnairePasteClient() {
             <code className="text-[11px]">1</code>–<code className="text-[11px]">5</code> or Very
             dissatisfied / Dissatisfied / Neutral / Satisfied / Very satisfied.{" "}
             <span className="font-medium text-gray-600">Lines 3–{2 + questionnaire.total_questions}:</span>{" "}
-            questionnaire answers in order (exact option text from questionnaire.json). After submit, the
+            questionnaire answers in order (same wording as{" "}
+            <code className="text-[11px]">questionnaire.json</code>; straight quotes). Curly apostrophes
+            from copy/paste are accepted.
             results page includes the same validation survey as <code className="text-[11px]">/study</code>{" "}
             so you can record whether your field appears in the top three.
           </p>
