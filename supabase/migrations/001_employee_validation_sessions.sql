@@ -1,5 +1,6 @@
 -- Validation study submissions (POST /api/study-response from Next.js).
 -- Run in Supabase SQL Editor once, or via Supabase CLI migrations.
+-- After this has been applied anywhere, do not modify this file; add a new numbered migration instead.
 
 create table if not exists public.employee_validation_sessions (
   id uuid primary key default gen_random_uuid(),

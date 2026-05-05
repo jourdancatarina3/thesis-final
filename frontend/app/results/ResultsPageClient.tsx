@@ -6,6 +6,7 @@ import ResultsCard from "@/components/ResultsCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
 import { CAREER_DESCRIPTIONS } from "@/lib/careerDescriptions";
+import { TARGET_CAREERS } from "@/lib/targetCareers";
 import {
   patchStudySession,
   readStudySession,
@@ -29,6 +30,11 @@ export default function ResultsPageClient() {
   const [studyMode, setStudyMode] = useState(false);
 
   const [fieldInTop3, setFieldInTop3] = useState<FieldInTop3Answer | "">("");
+  /** When fit is no/not sure: self-reported field + how close each predicted field feels (1–5). */
+  const [actualCareerField, setActualCareerField] = useState("");
+  const [rating1, setRating1] = useState(0);
+  const [rating2, setRating2] = useState(0);
+  const [rating3, setRating3] = useState(0);
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [thankYou, setThankYou] = useState(false);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
@@ -89,10 +95,18 @@ export default function ResultsPageClient() {
     setLoading(false);
   }, [searchParams, router]);
 
+  const needsFollowUp = fieldInTop3 === "no" || fieldInTop3 === "not_sure";
+
   const canSubmitFeedback = useMemo(() => {
     if (!studyMode || thankYou) return false;
-    return Boolean(fieldInTop3);
-  }, [studyMode, thankYou, fieldInTop3]);
+    if (!fieldInTop3) return false;
+    if (fieldInTop3 === "yes") return true;
+    if (!actualCareerField.trim()) return false;
+    if (rating1 < 1 || rating1 > 5 || rating2 < 1 || rating2 > 5 || rating3 < 1 || rating3 > 5) {
+      return false;
+    }
+    return true;
+  }, [studyMode, thankYou, fieldInTop3, actualCareerField, rating1, rating2, rating3]);
 
   const handleFeedbackSubmit = useCallback(async () => {
     if (!canSubmitFeedback || !fieldInTop3) return;
@@ -101,7 +115,7 @@ export default function ResultsPageClient() {
 
     setSubmittingFeedback(true);
     const feedbackSubmittedAt = new Date().toISOString();
-    const payload = {
+    const payload: Record<string, unknown> = {
       sessionId: session.sessionId,
       consentVersion: session.consentVersion,
       screening: session.screening,
@@ -110,6 +124,12 @@ export default function ResultsPageClient() {
       fieldInTop3,
       computedSelfReportedInTop3: false,
     };
+    if (fieldInTop3 === "no" || fieldInTop3 === "not_sure") {
+      payload.actualCareerField = actualCareerField.trim();
+      payload.ratingTop1 = rating1;
+      payload.ratingTop2 = rating2;
+      payload.ratingTop3 = rating3;
+    }
 
     try {
       const res = await fetch("/api/study-response", {
@@ -132,7 +152,14 @@ export default function ResultsPageClient() {
     } finally {
       setSubmittingFeedback(false);
     }
-  }, [canSubmitFeedback, fieldInTop3]);
+  }, [
+    canSubmitFeedback,
+    fieldInTop3,
+    actualCareerField,
+    rating1,
+    rating2,
+    rating3,
+  ]);
 
   if (loading) {
     return (
@@ -242,13 +269,85 @@ export default function ResultsPageClient() {
                           name="fit"
                           className="sr-only"
                           checked={fieldInTop3 === val}
-                          onChange={() => setFieldInTop3(val)}
+                          onChange={() => {
+                            setFieldInTop3(val);
+                            if (val === "yes") {
+                              setActualCareerField("");
+                              setRating1(0);
+                              setRating2(0);
+                              setRating3(0);
+                            }
+                          }}
                         />
                         {label}
                       </label>
                     ))}
                   </div>
                 </div>
+
+                {needsFollowUp && (
+                  <div className="space-y-6 mb-6 border-t border-gray-100 pt-6">
+                    <div>
+                      <label
+                        htmlFor="actual-career-field"
+                        className="block text-sm font-semibold text-gray-800 mb-2"
+                      >
+                        Which college field best matches your current job or career?{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <select
+                        id="actual-career-field"
+                        value={actualCareerField}
+                        onChange={(e) => setActualCareerField(e.target.value)}
+                        className="w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      >
+                        <option value="">Choose one of the 14 fields…</option>
+                        {TARGET_CAREERS.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 mb-1">
+                        How close is each recommendation to directions you would consider?{" "}
+                        <span className="text-red-600">*</span>
+                      </p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        1 = not at all close · 5 = very close
+                      </p>
+                      <div className="space-y-5">
+                        {predictions.slice(0, 3).map((p, i) => {
+                          const setR = i === 0 ? setRating1 : i === 1 ? setRating2 : setRating3;
+                          const r = i === 0 ? rating1 : i === 1 ? rating2 : rating3;
+                          return (
+                            <div key={p.career} className="rounded-lg border border-gray-100 p-4 bg-gray-50/80">
+                              <p className="text-sm font-semibold text-gray-900 mb-2">{p.career}</p>
+                              <div className="flex flex-wrap gap-2">
+                                {[1, 2, 3, 4, 5].map((n) => (
+                                  <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setR(n)}
+                                    className={`min-w-[2.5rem] py-2 rounded-lg text-sm font-medium border-2 transition-all ${
+                                      r === n
+                                        ? "border-indigo-600 bg-indigo-600 text-white"
+                                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                                    }`}
+                                  >
+                                    {n}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="button"
