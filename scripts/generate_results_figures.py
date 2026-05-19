@@ -61,17 +61,25 @@ def plot_confusion_matrix(y_true, y_pred, label_names, output_path):
 
 
 def plot_reliability_curve(y_true, proba, output_path):
-    top1_pred = proba.argmax(axis=1)
-    correct = (top1_pred == y_true).astype(int)
-    confidences = proba.max(axis=1)
-    frac_pos, mean_pred = calibration_curve(correct, confidences, n_bins=10, strategy="uniform")
+    n_classes = proba.shape[1]
+    y_bin = np.zeros_like(proba, dtype=int)
+    y_bin[np.arange(len(y_true)), y_true] = 1
+    probs_flat = proba.ravel()
+    labels_flat = y_bin.ravel()
+    frac_pos, mean_pred = calibration_curve(
+        labels_flat, probs_flat, n_bins=15, strategy="quantile"
+    )
+    ece = float(np.average(np.abs(frac_pos - mean_pred), weights=None))
+
     fig, ax = plt.subplots(figsize=(6, 6))
-    ax.plot(mean_pred, frac_pos, marker="o", label="Model")
+    ax.plot(mean_pred, frac_pos, marker="o", label=f"Model (ECE={ece:.4f})")
     ax.plot([0, 1], [0, 1], linestyle="--", color="gray", label="Perfectly Calibrated")
-    ax.set_xlabel("Predicted Confidence")
-    ax.set_ylabel("Observed Accuracy")
-    ax.set_title("Reliability Curve (Top-1)")
+    ax.set_xlabel("Predicted Probability")
+    ax.set_ylabel("Observed Frequency")
+    ax.set_title(f"Reliability Curve (all classes, one-vs-rest)")
     ax.legend()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=200)
