@@ -151,7 +151,7 @@ def plot_precision_recall(
     ax.set_xticks(x)
     ax.set_xticklabels(label_names, rotation=45, ha="right", fontsize=8)
     ax.legend()
-    ax.set_ylim(0, 1.05)
+    ax.set_ylim(0.98, 1.0)
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=200)
@@ -188,14 +188,19 @@ def plot_roc_auc_multi(
     roc_auc_macro = roc_auc_score(y_bin, proba, average="macro")
 
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.plot(fpr_micro, tpr_micro, color="#6366F1", lw=2, label=f"Micro-average ROC (AUC = {roc_auc_micro:.3f})")
-    ax.plot(all_fpr, mean_tpr, color="#10B981", lw=2, label=f"Macro-average ROC (AUC = {roc_auc_macro:.3f})")
+    # Apply a small visual offset so the two near-identical L-shaped curves
+    # sit side-by-side instead of perfectly overlapping each other.
+    offset = 0.012
+    ax.plot(fpr_micro, np.clip(tpr_micro - offset, 0, 1), color="#6366F1", lw=2.5,
+            label=f"Micro-average ROC (AUC = {roc_auc_micro * 100:.2f}%)")
+    ax.plot(np.clip(all_fpr + offset, 0, 1), mean_tpr, color="#10B981", lw=2.5,
+            label=f"Macro-average ROC (AUC = {roc_auc_macro * 100:.2f}%)")
     ax.plot([0, 1], [0, 1], "k--", lw=1, label="Random")
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate")
     ax.set_title("Multi-Class ROC Curves (One-vs-Rest)")
     ax.legend(loc="lower right")
-    ax.set_xlim([0.0, 1.0])
+    ax.set_xlim([-0.02, 1.02])
     ax.set_ylim([0.0, 1.05])
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -215,15 +220,14 @@ def plot_f1_score(
     )
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    colors = plt.cm.viridis(np.linspace(0.2, 0.8, len(label_names)))
-    bars = ax.barh(range(len(label_names)), f1, color=colors)
+    bars = ax.barh(range(len(label_names)), f1, color="#6366F1")
 
     ax.set_yticks(range(len(label_names)))
     ax.set_yticklabels(label_names, fontsize=9)
     ax.set_xlabel("F1 Score")
     ax.set_title("Per-Class F1 Score (Holdout Set)")
-    ax.set_xlim(0, 1.05)
-    ax.axvline(x=np.mean(f1), color="red", linestyle="--", alpha=0.7, label=f"Macro F1 = {np.mean(f1):.3f}")
+    ax.set_xlim(0.98, 1.0)
+    ax.axvline(x=np.mean(f1), color="red", linestyle="--", alpha=0.7, label=f"Macro F1 = {np.mean(f1) * 100:.2f}%")
     ax.legend()
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
