@@ -222,7 +222,9 @@ export default function ResultsPageClient() {
               <p className="text-base text-gray-600 max-w-xl mx-auto sm:text-lg">
                 Based on your responses, here are three college fields that match your profile.
               </p>
-              <p className="text-sm text-gray-500 mt-2 italic">Listed in no particular order</p>
+              <p className="text-sm text-gray-500 mt-2 italic">
+                Ranked by the model&apos;s calibrated match confidence
+              </p>
             </div>
 
             <div className="space-y-4 mb-8 sm:space-y-5 sm:mb-12">
@@ -231,6 +233,7 @@ export default function ResultsPageClient() {
                   key={prediction.career + String(index)}
                   career={prediction.career}
                   description={prediction.description}
+                  probability={prediction.probability}
                   accentColor={["slate", "teal", "amber"][index] as "slate" | "teal" | "amber"}
                 />
               ))}
